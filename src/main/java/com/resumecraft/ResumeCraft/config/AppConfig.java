@@ -24,7 +24,7 @@ public class AppConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(Authorize -> Authorize
-                        .requestMatchers("/api/auth/registerUser", "/api/auth/loginUser", "/api/auth/registerAdmin", "/api/auth/loginAdmin").permitAll()
+                        .requestMatchers("/api/auth/registerUser", "/api/auth/loginUser", "/api/auth/registerAdmin", "/api/auth/loginAdmin","/api/templates/*").permitAll()
                         .requestMatchers("/api/users/{id}").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()

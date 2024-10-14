@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,10 +59,11 @@ public class AuthController {
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getEmail(),savedUser.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token= jwtProvider.generateToken(authentication);
+        // Generate JWT after registration
+        String jwt = jwtProvider.generateToken(authentication, savedUser.getId()); // Pass savedUser.getId()
 
         AuthResponse authResponse=new AuthResponse();
-        authResponse.setJwt(token);
+        authResponse.setJwt(jwt);
         authResponse.setMessage("Signup Success");
         return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
     }
@@ -74,11 +76,15 @@ public class AuthController {
 
         Authentication authentication = authenticate(username, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Retrieve the user by email (or username)
+        User loggedInUser = userRepository.findOptionalByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-        String token = jwtProvider.generateToken(authentication);
+        // Generate JWT token with userId
+        String jwt = jwtProvider.generateToken(authentication, loggedInUser.getId()); // Pass loggedInUser.getId()
 
         AuthResponse authResponse = new AuthResponse();
-        authResponse.setJwt(token);
+        authResponse.setJwt(jwt);
         authResponse.setMessage("Login Successfully");
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
@@ -107,10 +113,11 @@ public class AuthController {
         Authentication authentication=new UsernamePasswordAuthenticationToken(savedUser.getEmail(),savedUser.getPassword());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token= jwtProvider.generateToken(authentication);
+        // Generate JWT after registration
+        String jwt = jwtProvider.generateToken(authentication, savedUser.getId()); // Pass savedUser.getId()
 
         AuthResponse authResponse=new AuthResponse();
-        authResponse.setJwt(token);
+        authResponse.setJwt(jwt);
         authResponse.setMessage("Signup Success");
         return new ResponseEntity<AuthResponse>(authResponse, HttpStatus.CREATED);
     }
@@ -124,10 +131,15 @@ public class AuthController {
         Authentication authentication = authenticate(username, password);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String token = jwtProvider.generateToken(authentication);
+        // Retrieve the user by email (or username)
+        User loggedInUser = userRepository.findOptionalByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+
+        // Generate JWT token with userId
+        String jwt = jwtProvider.generateToken(authentication, loggedInUser.getId()); // Pass loggedInUser.getId()
 
         AuthResponse authResponse = new AuthResponse();
-        authResponse.setJwt(token);
+        authResponse.setJwt(jwt);
         authResponse.setMessage("Login Successfully");
         return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
     }
