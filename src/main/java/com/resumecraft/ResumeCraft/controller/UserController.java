@@ -1,7 +1,8 @@
 package com.resumecraft.ResumeCraft.controller;
 
 import com.resumecraft.ResumeCraft.dto.UpdateProfileRequest;
-import com.resumecraft.ResumeCraft.dto.UserAndResumeUpdateRequest;
+import com.resumecraft.ResumeCraft.dto.response.ResumeResponse;
+import com.resumecraft.ResumeCraft.dto.response.UserProfileWithResumesResponse;
 import com.resumecraft.ResumeCraft.exception.UserException;
 import com.resumecraft.ResumeCraft.model.Resume;
 import com.resumecraft.ResumeCraft.model.User;
@@ -12,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -28,23 +26,21 @@ public class UserController {
 
     // Endpoint to find user profile by JWT token
     @GetMapping("/profile")
-    public ResponseEntity<User> findUserProfileByJwt(@RequestHeader("Authorization") String jwt)throws UserException {
-        User user = userService.findUserProfileByJwt(jwt);
-        return new ResponseEntity<User>(user,HttpStatus.ACCEPTED);
-
+    public ResponseEntity<UserProfileWithResumesResponse> findUserProfileWithResumesByJwt(
+            @RequestHeader("Authorization") String jwt) throws UserException {
+        UserProfileWithResumesResponse response = userService.findUserProfileWithResumesByJwt(jwt);
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
+
     @PutMapping("/update")
-    public ResponseEntity<?> updateUserAndResume(@RequestHeader("Authorization") String jwt,
-                                                 @RequestBody UserAndResumeUpdateRequest updateRequest) {
+    public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String jwt,
+                                                 @RequestBody UpdateProfileRequest updateRequest) {
         try {
             // Step 1: Update user details using the service
-            User updatedUser = userService.updateUserProfile(jwt, updateRequest.getUserProfile());
+            User updatedUser = userService.updateUserProfile(jwt, updateRequest);
 
-            // Step 2: Create or update resumes associated with the user
-            List<Resume> updatedResumes = resumeService.updateUserResumes(updatedUser, updateRequest.getResumes());
-
-            return ResponseEntity.ok("User and resumes updated successfully!");
+            return ResponseEntity.ok("User updated successfully!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error updating user and resumes: " + e.getMessage());
@@ -58,7 +54,7 @@ public class UserController {
     public ResponseEntity<?> createResume(@RequestBody Resume resume, @RequestHeader("Authorization") String jwt) {
         try {
             // Extract the user profile using the JWT
-            User user = userService.findUserProfileByJwt(jwt);
+            UserProfileWithResumesResponse user = userService.findUserProfileWithResumesByJwt(jwt);
 
             // Call the service method to create the resume and associate it with the user
             Resume createdResume = resumeService.createResume(resume, user);
@@ -68,6 +64,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error creating resume: " + e.getMessage());
         }
     }
+
+    @GetMapping("/userProfileWithResumes")
+    public ResponseEntity<?> getUserProfileWithResumes(@RequestHeader("Authorization") String jwt) {
+        try {
+            UserProfileWithResumesResponse response = userService.getLatestUserProfileWithResumes(jwt);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error fetching user profile with resumes: " + e.getMessage());
+        }
+    }
+
 
 
 

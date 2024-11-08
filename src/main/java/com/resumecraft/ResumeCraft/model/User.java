@@ -22,6 +22,7 @@ public class User {
 
     private String email;
     private String password;
+    private String mobileNumber;
     private String role; // 'USER' or 'ADMIN'
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

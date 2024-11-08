@@ -5,14 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserAndResumeUpdateRequest {
-    private UpdateProfileRequest userProfile;
-    private List<ResumeUpdateRequest> resumes;
-
+public class ProjectUpdateRequest {
+    private Long id; // Project ID
+    private String projectName;
+    private String projectDescription;
 }

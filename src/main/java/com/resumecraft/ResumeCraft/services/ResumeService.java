@@ -1,9 +1,12 @@
 package com.resumecraft.ResumeCraft.services;
 
-import com.resumecraft.ResumeCraft.dto.ResumeUpdateRequest;
+import com.resumecraft.ResumeCraft.dto.ProjectUpdateRequest;
+import com.resumecraft.ResumeCraft.dto.response.UserProfileWithResumesResponse;
 import com.resumecraft.ResumeCraft.exception.UserException;
+import com.resumecraft.ResumeCraft.model.Project;
 import com.resumecraft.ResumeCraft.model.Resume;
 import com.resumecraft.ResumeCraft.model.User;
+import com.resumecraft.ResumeCraft.repository.ProjectRepository;
 import com.resumecraft.ResumeCraft.repository.ResumeRepository;
 import com.resumecraft.ResumeCraft.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,53 +22,45 @@ public class ResumeService {
     private UserRepository userRepository;
     @Autowired
     private ResumeRepository resumeRepository;
-    public Resume createResume(Resume resume, User user) throws UserException {
-        // Create a new Resume object and associate the user
-        resume.setUser(user);  // Associate the resume with the user
-
-        // Save the resume fields
-        resume.setTemplateName(resume.getTemplateName());
-        resume.setPersonalInfo(resume.getPersonalInfo());
-        resume.setEducationDetails(resume.getEducationDetails());
-        resume.setWorkExperience(resume.getWorkExperience());
-        resume.setSkills(resume.getSkills());  // Save the list of skills
-        resume.setMobileNumber(resume.getMobileNumber());
-        resume.setEmail(resume.getEmail());
-        resume.setGithubLink(resume.getGithubLink());
-        resume.setLinkedinLink(resume.getLinkedinLink());
-        resume.setTwitterLink(resume.getTwitterLink());
-
-        // Save the resume to the repository
-        return resumeRepository.save(resume);
-    }
-
-    public List<Resume> updateUserResumes(User user, List<ResumeUpdateRequest> resumeUpdateRequests) throws UserException {
-        List<Resume> updatedResumes = new ArrayList<>();
-
-        for (ResumeUpdateRequest resumeRequest : resumeUpdateRequests) {
-            Resume resume = new Resume();
+    @Autowired
+    private ProjectRepository projectRepository;
+    public Resume createResume(Resume resume, UserProfileWithResumesResponse userResponse) throws UserException {
+        // Retrieve the user based on the user ID in UserProfileWithResumesResponse
+        Optional<User> userOptional = userRepository.findById(userResponse.getUserProfile().getId());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
 
             // Associate the resume with the user
             resume.setUser(user);
 
-            // Update resume details
-            resume.setTemplateName(resumeRequest.getTemplateName());
-            resume.setPersonalInfo(resumeRequest.getPersonalInfo());
-            resume.setEducationDetails(resumeRequest.getEducationDetails());
-            resume.setWorkExperience(resumeRequest.getWorkExperience());
-            resume.setSkills(resumeRequest.getSkills());
-            resume.setMobileNumber(resumeRequest.getMobileNumber());
-            resume.setEmail(resumeRequest.getEmail());
-            resume.setGithubLink(resumeRequest.getGithubLink());
-            resume.setLinkedinLink(resumeRequest.getLinkedinLink());
-            resume.setTwitterLink(resumeRequest.getTwitterLink());
+            // Set the fields of the resume
+            resume.setTemplateName(resume.getTemplateName());
+            resume.setPersonalInfo(resume.getPersonalInfo());
+            resume.setEducationDetails(resume.getEducationDetails());
+            resume.setWorkExperience(resume.getWorkExperience());
+            resume.setSkills(resume.getSkills());  // Save the list of skills
+            resume.setMobileNumber(resume.getMobileNumber());
+            resume.setEmail(resume.getEmail());
+            resume.setGithubLink(resume.getGithubLink());
+            resume.setLinkedinLink(resume.getLinkedinLink());
+            resume.setTwitterLink(resume.getTwitterLink());
 
-            // Save updated resume
-            updatedResumes.add(resumeRepository.save(resume));
+            // Associate each project with the resume
+            List<Project> projects = resume.getProjects();
+            if (projects != null && !projects.isEmpty()) {
+                for (Project project : projects) {
+                    project.setResume(resume);  // Set the resume for each project
+                }
+            }
+
+            // Save the resume to the repository, which also saves the projects due to CascadeType.ALL
+            return resumeRepository.save(resume);
+        } else {
+            throw new UserException("User not found");
         }
-
-        return updatedResumes;
     }
+
+
 
     public Optional<Resume> findResumeById(Long id, User user) {
         // Fetch resume based on ID and ensure it belongs to the user

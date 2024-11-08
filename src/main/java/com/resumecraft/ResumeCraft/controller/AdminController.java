@@ -1,7 +1,9 @@
 package com.resumecraft.ResumeCraft.controller;
 
+import com.resumecraft.ResumeCraft.dto.UpdateProfileRequest;
 import com.resumecraft.ResumeCraft.model.User;
 import com.resumecraft.ResumeCraft.repository.UserRepository;
+import com.resumecraft.ResumeCraft.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import java.util.Optional;
 public class AdminController {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
     @GetMapping("/allUsers")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userRepository.findAll());
@@ -35,5 +39,17 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
+    @PutMapping("/updateAdmin")
+    public ResponseEntity<?> updateAdmin(@RequestHeader("Authorization") String jwt,
+                                                 @RequestBody UpdateProfileRequest updateRequest) {
+        try {
+            // Step 1: Update user details using the service
+            User updatedUser = userService.updateAdminProfile(jwt, updateRequest);
 
+            return ResponseEntity.ok("User updated successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error updating user and resumes: " + e.getMessage());
+        }
+    }
 }

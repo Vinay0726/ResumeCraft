@@ -38,4 +38,8 @@ public class Resume {
     @JoinColumn(name = "user_id")
     private User user;
 
+
+    // OneToMany relationship with Project
+    @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Project> projects;
 }
