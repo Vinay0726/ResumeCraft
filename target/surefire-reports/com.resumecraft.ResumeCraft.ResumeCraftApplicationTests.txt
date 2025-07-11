@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.resumecraft.ResumeCraft.ResumeCraftApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 23.29 s -- in com.resumecraft.ResumeCraft.ResumeCraftApplicationTests
