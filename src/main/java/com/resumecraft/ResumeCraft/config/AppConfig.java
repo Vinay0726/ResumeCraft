@@ -42,17 +42,15 @@ public class AppConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        // Allow specific origins (front-end URLs)
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:4200","https://resumescraft.netlify.app"));
-        // Allow all HTTP methods
-        corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
-        // Allow credentials (like cookies or authorization headers)
+        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:4200",
+                "https://resumescraft.netlify.app"
+        ));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowCredentials(true);
-        // Allow all headers from the client
-        corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
-        // Expose headers like Authorization
+        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
         corsConfiguration.setExposedHeaders(Collections.singletonList("Authorization"));
-        // Cache the CORS settings for 1 hour
         corsConfiguration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
